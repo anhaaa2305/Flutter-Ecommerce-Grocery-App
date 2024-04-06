@@ -32,7 +32,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final Utils utils = Utils(context);
-    //final themeState = utils.getTheme;
     Size size = utils.getScreenSize;
     Color color = utils.getColor;
     final productProviders = Provider.of<ProductsProvider>(context);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:provider/provider.dart';
-import 'package:shopping_app_flutter/screens/cart_screens/cart.dart';
+import 'package:shopping_app_flutter/screens/cart_screens/cart_screen.dart';
 import 'package:shopping_app_flutter/screens/categories.dart';
 import 'package:shopping_app_flutter/screens/home.dart';
 import 'package:shopping_app_flutter/screens/user.dart';
@@ -42,21 +42,14 @@ class _BottomBarScreenState extends State<BottomBarScreen> {
       _selectedIndex = index;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     final themeState = Provider.of<DarkThemeProvider>(context);
     final cartProvider = Provider.of<CartProvider>(context);
     final cartItemList =
         cartProvider.getCartItems.values.toList().reversed.toList();
+
     return Scaffold(
-      /*appBar: AppBar(
-        title: Text(_pages[_selectedIndex]['title'],
-        style:const TextStyle(
-          fontWeight: FontWeight.bold
-        ),),
-        backgroundColor: _isDark ? Colors.blueGrey : Colors.lightBlue.shade200,
-      ),*/
       body: _pages[_selectedIndex]['page'],
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: themeState.getDarkTheme

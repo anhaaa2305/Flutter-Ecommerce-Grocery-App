@@ -1,4 +1,5 @@
 import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -10,7 +11,9 @@ import 'package:shopping_app_flutter/providers_impl/wishlist_provider.dart';
 import 'package:shopping_app_flutter/widgets/heart_btn.dart';
 import 'package:shopping_app_flutter/widgets/price_widget.dart';
 import 'package:shopping_app_flutter/widgets/text_widget.dart';
+import '../consts/firebase_constss.dart';
 import '../provider/dark_theme_provider.dart';
+import '../services/global_method.dart';
 import '../services/utils.dart';
 
 class FeedsWidget extends StatefulWidget {
@@ -160,6 +163,12 @@ class _FeedsWidgetState extends State<FeedsWidget> {
                 width: double.infinity,
                 child: TextButton(
                   onPressed: isInCart ? null : () {
+                    final User? user = authInstance.currentUser;
+                    if (user == null) {
+                      GlobalMethods.errorDialog(subtitle: "Please log in to continue using the service. Thank you!", context: context);
+                      return;
+                    }
+
                     Fluttertoast.showToast(msg: "Add to Cart Successful");
                     cartProvider.addProductsToCart(
                       productId: productsModel.id,

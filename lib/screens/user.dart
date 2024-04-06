@@ -1,9 +1,12 @@
 import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:shopping_app_flutter/consts/firebase_constss.dart';
+import 'package:shopping_app_flutter/screens/auths/login_screen.dart';
 import 'package:shopping_app_flutter/screens/order_screens/orders_screen.dart';
 import 'package:shopping_app_flutter/screens/viewed_recently/viewed_recently_screen.dart';
 import 'package:shopping_app_flutter/screens/wishlist_screens/wishlist_screen.dart';
@@ -21,6 +24,7 @@ class UserScreen extends StatefulWidget {
 class _UserScreenState extends State<UserScreen> {
   final TextEditingController _addressController =
       TextEditingController(text: "");
+
   // Defined Subtitle
   @override
   void dispose() {
@@ -32,7 +36,9 @@ class _UserScreenState extends State<UserScreen> {
   @override
   Widget build(BuildContext context) {
     final themeState = Provider.of<DarkThemeProvider>(context);
-    final Color color = themeState.getDarkTheme ? Colors.white.withOpacity(0.9) : Colors.black;
+    final Color color =
+        themeState.getDarkTheme ? Colors.white.withOpacity(0.9) : Colors.black;
+    final User? user = authInstance.currentUser;
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -87,7 +93,7 @@ class _UserScreenState extends State<UserScreen> {
                     subtitle: "Sản phẩm đã chọn",
                     icon: IconlyLight.bag,
                     onPressed: () {
-                        GlobalMethods.navigateTo(context, OrderScreen.routeName);
+                      GlobalMethods.navigateTo(context, OrderScreen.routeName);
                     },
                     color: color),
                 _listTitle(
@@ -104,7 +110,8 @@ class _UserScreenState extends State<UserScreen> {
                     subtitle: "Sản phẩm bạn đã xem",
                     icon: IconlyLight.show,
                     onPressed: () {
-                      GlobalMethods.navigateTo(context, ViewedRecentlyScreen.routeName);
+                      GlobalMethods.navigateTo(
+                          context, ViewedRecentlyScreen.routeName);
                     },
                     color: color),
                 _listTitle(
@@ -114,15 +121,23 @@ class _UserScreenState extends State<UserScreen> {
                     onPressed: () {},
                     color: color),
                 _listTitle(
-                    title: "Logout",
-                    subtitle: "Đăng xuất khỏi tài khoản hiện tại",
-                    icon: IconlyLight.logout,
+                    title: user == null ? "Login" : "Logout",
+                    subtitle: user == null
+                        ? "Đăng nhập để sử dụng dịch vụ"
+                        : "Đăng xuất khỏi tài khoản hiện tại",
+                    icon: user == null ? IconlyLight.login : IconlyLight.logout,
                     onPressed: () async {
-                      GlobalMethods.warningDialog(
-                          title: "Sign out",
-                          subtitle: "Do you wanna sign out?",
-                          fct: () {},
-                          context: context);
+                      user == null
+                          ? Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (context) => const LoginScreen()))
+                          : GlobalMethods.warningDialog(
+                              title: "Sign out",
+                              subtitle: "Do you wanna sign out?",
+                              fct: () {
+                                authInstance.signOut();
+                              },
+                              context: context);
                     },
                     color: color),
                 SwitchListTile(
@@ -168,9 +183,10 @@ class _UserScreenState extends State<UserScreen> {
               controller: _addressController,
               maxLines: 2,
               decoration: InputDecoration(
-                  hintText: "Your address", hintStyle: TextStyle(
-                color: Colors.black.withOpacity(0.5),
-              )),
+                  hintText: "Your address",
+                  hintStyle: TextStyle(
+                    color: Colors.black.withOpacity(0.5),
+                  )),
             ),
             actions: [
               TextButton(

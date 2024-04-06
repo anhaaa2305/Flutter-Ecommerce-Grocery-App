@@ -7,7 +7,6 @@ class EmptyScreen extends StatelessWidget {
       {super.key, required this.imagePath, required this.title, required this.subtitle, required this.buttonText});
 
   final String imagePath, title, subtitle, buttonText;
-
   @override
   Widget build(BuildContext context) {
     Size size = Utils(context).getScreenSize;
@@ -31,7 +30,7 @@ class EmptyScreen extends StatelessWidget {
               Text(
                 title,
                 style: const TextStyle(
-                    fontSize: 40,
+                    fontSize: 35,
                     color: Colors.red,
                     fontWeight: FontWeight.w700),
               ),
@@ -73,7 +72,7 @@ class EmptyScreen extends StatelessWidget {
                       text: buttonText,
                       color: color,
                       isTitle: true,
-                      textSize: 25),
+                      textSize: 20),
                 ),
               ),
             ],

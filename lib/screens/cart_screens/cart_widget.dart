@@ -52,7 +52,8 @@ class _CartWidgetState extends State<CartWidget> {
         : getCurrentProduct.price;
     final cartProvider = Provider.of<CartProvider>(context);
     final wishListProvider = Provider.of<WishListProvider>(context);
-    bool? isInWishList = wishListProvider.getWishListItem.containsKey(getCurrentProduct.id);
+    bool? isInWishList =
+        wishListProvider.getWishListItem.containsKey(getCurrentProduct.id);
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(context, ProductDetailsScreen.routeName,

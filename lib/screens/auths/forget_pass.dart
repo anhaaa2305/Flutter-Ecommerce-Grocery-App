@@ -28,7 +28,6 @@ class _ForgetPasswordScreenState extends State<ForgetPasswordScreen> {
   void _forgetPassFCT() {
 
   }
-
   @override
   Widget build(BuildContext context) {
     Size size = Utils(context).getScreenSize;

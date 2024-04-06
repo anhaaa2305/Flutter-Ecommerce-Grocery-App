@@ -15,9 +15,6 @@ class OrderScreen extends StatefulWidget {
 class _OrderScreenState extends State<OrderScreen> {
   @override
   Widget build(BuildContext context) {
-    //final themeState = Provider.of<DarkThemeProvider>(context);
-    //final theme = Utils(context).getTheme;
-    //Size size = Utils(context).getScreenSize;
     final Color color = Utils(context).getColor;
     return Scaffold(
         appBar: AppBar(
