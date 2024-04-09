@@ -1,4 +1,3 @@
-import 'package:shopping_app_flutter/models/products_model.dart';
 
 class Constss {
   static final List<String> offerImages = [

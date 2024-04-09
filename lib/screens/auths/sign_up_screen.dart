@@ -1,6 +1,6 @@
 import 'package:card_swiper/card_swiper.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -32,7 +32,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _emailFocusNode = FocusNode();
   final _addressFocusNode = FocusNode();
   var _obscureText = true;
-
   @override
   void dispose() {
     _fullNameController.dispose();
@@ -44,9 +43,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _addressFocusNode.dispose();
     super.dispose();
   }
-
   bool _isLoading = false;
-
   bool _validateForm() {
     if (_emailTextController.text.isEmpty ||
         _passTextController.text.isEmpty ||
@@ -56,11 +53,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
     return true;
   }
-
-  void _submitFormOnRegister() async {
+  void _submitFormOnRegister(BuildContext context) async {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
-
     setState(() {
       if (!_validateForm()) {
         _isLoading = false;
@@ -71,30 +66,48 @@ class _SignUpScreenState extends State<SignUpScreen> {
     if (isValid) {
       _formKey.currentState!.save();
       try {
+        // Using firebase Auth to Create account with Email & Password
         await authInstance.createUserWithEmailAndPassword(
           email: _emailTextController.text.toLowerCase().trim(),
           password: _passTextController.text.trim(),
         );
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const LoginScreen()));
-        if (kDebugMode) {
-          print(
-              "Save successfully account : ${_emailTextController.text.toLowerCase().trim()}");
+        // Using Firebase FireStore to Store User information.
+        final User? user = authInstance.currentUser;
+        final uid = user?.uid;
+        await FirebaseFirestore.instance.collection("users").doc(uid).set({
+          "id": uid,
+          "name": _fullNameController.text.trim(),
+          "email": _emailTextController.text.toLowerCase().trim(),
+          "shipping-address": _addressTextController.text,
+          "userWish": [],
+          "userCart": [],
+          "createAt": Timestamp.now(),
+        });
+        if (context.mounted) {
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const LoginScreen()));
         }
+        Fluttertoast.showToast(
+            msg:
+                "Create account with email ${_emailTextController.text.toLowerCase().trim()} successfully");
       } on FirebaseException catch (error) {
-        GlobalMethods.errorDialog(
-            subtitle: "Has occured when saving account: ${error.message}",
-            context: context);
         setState(() {
           _isLoading = false;
         });
+        if (context.mounted) {
+          GlobalMethods.errorDialog(
+              subtitle: "Has occured when saving account: ${error.message}",
+              context: context);
+        }
       } catch (error) {
-        GlobalMethods.errorDialog(
-            subtitle: "Has occured when saving account: $error",
-            context: context);
         setState(() {
           _isLoading = false;
         });
+        if (context.mounted) {
+          GlobalMethods.errorDialog(
+              subtitle: "Has occured when saving account: $error",
+              context: context);
+        }
       } finally {
         setState(() {
           _isLoading = false;
@@ -106,6 +119,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: LoadingManager(
         isLoading: _isLoading,
         child: Stack(
@@ -164,7 +178,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             onEditingComplete: () => FocusScope.of(context)
                                 .requestFocus(_emailFocusNode),
                             controller: _fullNameController,
-                            keyboardType: TextInputType.emailAddress,
+                            keyboardType: TextInputType.text,
                             validator: (value) {
                               if (value!.isEmpty) {
                                 return "Please enter your name";
@@ -217,11 +231,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           const SizedBox(
                             height: 25,
                           ),
+
                           // Password
                           TextFormField(
                             textInputAction: TextInputAction.next,
                             onEditingComplete: () {
-                              _submitFormOnRegister();
+                              _submitFormOnRegister(context);
                             },
                             controller: _passTextController,
                             focusNode: _passFocusNode,
@@ -239,8 +254,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             decoration: InputDecoration(
                               suffixIcon: GestureDetector(
                                 onTap: () {
-                                  Fluttertoast.showToast(
-                                      msg: "Password showed");
                                   setState(() {
                                     _obscureText = !_obscureText;
                                   });
@@ -324,7 +337,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   AuthButton(
                       fct: () {
-                        _submitFormOnRegister();
+                        _submitFormOnRegister(context);
                       },
                       buttonText: "Sign up",
                       primary: Colors.grey),

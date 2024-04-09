@@ -13,14 +13,11 @@ import '../../widgets/text_widget.dart';
 
 class WishlistScreen extends StatelessWidget {
   static const routeName = "/WishlistScreen";
-
   const WishlistScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     final themeState = Provider.of<DarkThemeProvider>(context);
     final Color color = Utils(context).getColor;
-    Size size = Utils(context).getScreenSize;
     final wishListProvider = Provider.of<WishListProvider>(context);
     final wishListItemsList =
         wishListProvider.getWishListItem.values.toList().reversed.toList();

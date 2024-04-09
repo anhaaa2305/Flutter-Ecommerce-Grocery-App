@@ -13,7 +13,6 @@ class TextWidget extends StatelessWidget {
   final double textSize;
   final bool isTitle;
   int maxLines = 10;
-
   @override
   Widget build(BuildContext context) {
     //final themeState = Provider.of<DarkThemeProvider>(context);

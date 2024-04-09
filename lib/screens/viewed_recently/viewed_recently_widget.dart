@@ -202,7 +202,7 @@ class _ViewedRecentlyWidgetState extends State<ViewedRecentlyWidget> {
                 TextWidget(
                   text: getCurrProduct.title,
                   color: color,
-                  textSize: 24,
+                  textSize: 20,
                   isTitle: true,
                 ),
                 const SizedBox(

@@ -28,7 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
     "images/offers/Offer3.jpg",
     "images/offers/Offer4.jpg"
   ];
-
   @override
   Widget build(BuildContext context) {
     final Utils utils = Utils(context);

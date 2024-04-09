@@ -9,7 +9,7 @@ class BackWidget extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: () {
-        Navigator.pop(context);
+        Navigator.canPop(context) ? Navigator.pop(context) : null;
       },
       child: Icon(
         IconlyLight.arrowLeft2,

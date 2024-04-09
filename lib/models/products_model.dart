@@ -1,7 +1,4 @@
-import 'dart:ffi';
-
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 
 class ProductModel with ChangeNotifier {
   final String id, title, imageUrl, productCategoryName;

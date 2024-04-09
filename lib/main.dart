@@ -20,7 +20,7 @@ import 'package:shopping_app_flutter/screens/order_screens/orders_screen.dart';
 import 'package:shopping_app_flutter/screens/viewed_recently/viewed_recently_screen.dart';
 import 'package:shopping_app_flutter/screens/wishlist_screens/wishlist_screen.dart';
 
-void main() {
+void main() async{
   runApp(const MyApp());
 }
 
@@ -52,62 +52,44 @@ class _MyAppState extends State<MyApp> {
     return FutureBuilder(
       future: _firebaseInitialization,
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting){
-          return const MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-          );
-        } /*else if (snapshot.hasError) {
-          return const MaterialApp(
-            home: Scaffold(
-              body: Center(
-                child: Text("An error Occured"),
-              ),
-            ),
-          );
-        } */else {
-          return MultiProvider(
-            providers: [
-              ChangeNotifierProvider(create: (_) {
-                return themeChangeProvider;
+        return MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) {
+              return themeChangeProvider;
+            }),
+            ChangeNotifierProvider(create: (_) => ProductsProvider()),
+            ChangeNotifierProvider(create: (_) => CartProvider()),
+            ChangeNotifierProvider(create: (_) => WishListProvider()),
+            ChangeNotifierProvider(create: (_) => ViewedProdProvider()),
+          ],
+          child: Consumer<DarkThemeProvider>(
+              builder: (context, themeChangeProvider, child) {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: true,
+                  title: 'Grocery shopping app',
+                  theme: Styles.themeData(
+                      themeChangeProvider.getDarkTheme, context),
+                  home: const BottomBarScreen(),
+                  routes: {
+                    OnSaleScreen.routeName: (context) => const OnSaleScreen(),
+                    ProductDetailsScreen.routeName: (context) =>
+                    const ProductDetailsScreen(),
+                    WishlistScreen.routeName: (
+                        context) => const WishlistScreen(),
+                    OrderScreen.routeName: (context) => const OrderScreen(),
+                    ViewedRecentlyScreen.routeName: (context) =>
+                    const ViewedRecentlyScreen(),
+                    HomeScreen.routeName: (context) => const HomeScreen(),
+                    SignUpScreen.routeName: (context) => const SignUpScreen(),
+                    LoginScreen.routeName: (context) => const LoginScreen(),
+                    ForgetPasswordScreen.routeName: (context) =>
+                    const ForgetPasswordScreen(),
+                    FeedsScreen.routeName: (context) => const FeedsScreen(),
+                    CatsScreen.routeName: (context) => const CatsScreen(),
+                  },
+                );
               }),
-              ChangeNotifierProvider(create: (_) => ProductsProvider()),
-              ChangeNotifierProvider(create: (_) => CartProvider()),
-              ChangeNotifierProvider(create: (_) => WishListProvider()),
-              ChangeNotifierProvider(create: (_) => ViewedProdProvider()),
-            ],
-            child: Consumer<DarkThemeProvider>(
-                builder: (context, themeChangeProvider, child) {
-                  return MaterialApp(
-                    debugShowCheckedModeBanner: true,
-                    title: 'Flutter Demo',
-                    theme: Styles.themeData(
-                        themeChangeProvider.getDarkTheme, context),
-                    home: const BottomBarScreen(),
-                    routes: {
-                      OnSaleScreen.routeName: (context) => const OnSaleScreen(),
-                      ProductDetailsScreen.routeName: (context) =>
-                      const ProductDetailsScreen(),
-                      WishlistScreen.routeName: (
-                          context) => const WishlistScreen(),
-                      OrderScreen.routeName: (context) => const OrderScreen(),
-                      ViewedRecentlyScreen.routeName: (context) =>
-                      const ViewedRecentlyScreen(),
-                      HomeScreen.routeName: (context) => const HomeScreen(),
-                      SignUpScreen.routeName: (context) => const SignUpScreen(),
-                      LoginScreen.routeName: (context) => const LoginScreen(),
-                      ForgetPasswordScreen.routeName: (context) =>
-                      const ForgetPasswordScreen(),
-                      FeedsScreen.routeName: (context) => const FeedsScreen(),
-                      CatsScreen.routeName: (context) => const CatsScreen(),
-                    },
-                  );
-                }),
-          );
-        }
+        );
       },
     );
   }

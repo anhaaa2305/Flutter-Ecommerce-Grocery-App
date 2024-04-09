@@ -1,6 +1,5 @@
 import 'package:card_swiper/card_swiper.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -47,15 +46,13 @@ class _LoginScreenState extends State<LoginScreen> {
     }
     return true;
   }
-
-  void _submitFormOnLogin() async {
+  void _submitFormOnLogin(BuildContext context) async {
     final isValid = _formKey.currentState!.validate();
     FocusScope.of(context).unfocus();
     setState(() {
       if (!_validateForm()) {
         _isLoading = false;
-      }
-      else {
+      } else {
         _isLoading = true;
       }
     });
@@ -67,16 +64,22 @@ class _LoginScreenState extends State<LoginScreen> {
             password: _passTextController.text.trim());
         if (context.mounted) {
           Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (contex) => const BottomBarScreen()));
+              MaterialPageRoute(builder: (context) => const BottomBarScreen()));
         }
+        Fluttertoast.showToast(msg: "Login successfully");
       } on FirebaseException catch (error) {
         setState(() {
           _isLoading = false;
         });
-        GlobalMethods.errorDialog(
-            subtitle: "Error: ${error.message}", context: context);
+        if (context.mounted) {
+          GlobalMethods.errorDialog(
+              subtitle: "Error: ${error.message}", context: context);
+        }
       } catch (error) {
-        GlobalMethods.errorDialog(subtitle: "Error: $error", context: context);
+        if (context.mounted) {
+          GlobalMethods.errorDialog(
+              subtitle: "Error: $error", context: context);
+        }
         setState(() {
           _isLoading = false;
         });
@@ -91,6 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: LoadingManager(
         isLoading: _isLoading,
         child: Stack(
@@ -177,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             textInputAction: TextInputAction.done,
                             onEditingComplete: () {
-                              _submitFormOnLogin();
+                              _submitFormOnLogin(context);
                             },
                             controller: _passTextController,
                             focusNode: _passFocusNode,
@@ -251,7 +255,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   AuthButton(
                       fct: () {
-                        _submitFormOnLogin();
+                        _submitFormOnLogin(context);
                       },
                       buttonText: "Login",
                       primary: Colors.grey),

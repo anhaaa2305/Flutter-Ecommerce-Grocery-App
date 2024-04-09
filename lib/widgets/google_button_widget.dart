@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shopping_app_flutter/consts/firebase_constss.dart';
 import 'package:shopping_app_flutter/screens/bottom_bar_screen.dart';
@@ -22,6 +23,7 @@ class GoogleButton extends StatelessWidget {
             Navigator.of(context).pushReplacement(MaterialPageRoute(
                 builder: (context) => const BottomBarScreen()));
           }
+          Fluttertoast.showToast(msg: "Login with ${googleAccount.email} successfully");
         } on FirebaseException catch (error) {
           if (context.mounted) {
             GlobalMethods.errorDialog(

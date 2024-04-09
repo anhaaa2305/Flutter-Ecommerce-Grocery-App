@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,9 @@ import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app_flutter/consts/firebase_constss.dart';
+import 'package:shopping_app_flutter/screens/auths/forget_pass.dart';
 import 'package:shopping_app_flutter/screens/auths/login_screen.dart';
+import 'package:shopping_app_flutter/screens/loading_manager.dart';
 import 'package:shopping_app_flutter/screens/order_screens/orders_screen.dart';
 import 'package:shopping_app_flutter/screens/viewed_recently/viewed_recently_screen.dart';
 import 'package:shopping_app_flutter/screens/wishlist_screens/wishlist_screen.dart';
@@ -23,7 +26,12 @@ class UserScreen extends StatefulWidget {
 
 class _UserScreenState extends State<UserScreen> {
   final TextEditingController _addressController =
-      TextEditingController(text: "");
+  TextEditingController(text: "");
+  bool _isLoading = false;
+  final User? user = authInstance.currentUser;
+  String? _email;
+  String? _name;
+  String? _address;
 
   // Defined Subtitle
   @override
@@ -34,137 +42,193 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getUserData(context);
+  }
+
+  Future<void> getUserData(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
+    if (user == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+    try {
+      String uid = user!.uid;
+      final DocumentSnapshot userDoc =
+      await FirebaseFirestore.instance.collection("users").doc(uid).get();
+      _email = userDoc.get("email");
+      _name = userDoc.get("name");
+      _address = userDoc.get("shipping-address");
+      _addressController.text = userDoc.get("shipping-address");
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+      if (context.mounted) {
+        GlobalMethods.errorDialog(subtitle: "$error", context: context);
+      }
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final themeState = Provider.of<DarkThemeProvider>(context);
     final Color color =
-        themeState.getDarkTheme ? Colors.white.withOpacity(0.9) : Colors.black;
-    final User? user = authInstance.currentUser;
+    themeState.getDarkTheme ? Colors.white.withOpacity(0.9) : Colors.black;
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                RichText(
-                    text: TextSpan(
-                        text: "Hi, ",
-                        style: const TextStyle(
-                          color: Colors.cyan,
-                          fontSize: 27,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        children: <TextSpan>[
-                      TextSpan(
-                          text: "MyName",
-                          style: TextStyle(
-                            color: color,
-                            fontSize: 25,
+      body: LoadingManager(
+        isLoading: _isLoading,
+        child: Center(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  RichText(
+                      text: TextSpan(
+                          text: "Hi, ",
+                          style: const TextStyle(
+                            color: Colors.cyan,
+                            fontSize: 27,
                             fontWeight: FontWeight.bold,
                           ),
-                          recognizer: TapGestureRecognizer()..onTap = () {}),
-                    ])),
-                const SizedBox(
-                  height: 5,
-                ),
-                TextWidget(
-                  text: "name@gmail.com",
-                  color: color,
-                  textSize: 16,
-                ),
-                const Divider(
-                  thickness: 2,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                _listTitle(
-                    title: "Address",
-                    subtitle: _addressController.text.toString(),
-                    icon: IconlyLight.location,
-                    onPressed: () async {
-                      await _showAddressDialog();
-                    },
-                    color: color),
-                _listTitle(
-                    title: "Orders",
-                    subtitle: "Sản phẩm đã chọn",
-                    icon: IconlyLight.bag,
-                    onPressed: () {
-                      GlobalMethods.navigateTo(context, OrderScreen.routeName);
-                    },
-                    color: color),
-                _listTitle(
-                    title: "Wishlist",
-                    subtitle: "Sản phẩm yêu thích",
-                    icon: IconlyLight.heart,
-                    onPressed: () {
-                      GlobalMethods.navigateTo(
-                          context, WishlistScreen.routeName);
-                    },
-                    color: color),
-                _listTitle(
-                    title: "Viewed",
-                    subtitle: "Sản phẩm bạn đã xem",
-                    icon: IconlyLight.show,
-                    onPressed: () {
-                      GlobalMethods.navigateTo(
-                          context, ViewedRecentlyScreen.routeName);
-                    },
-                    color: color),
-                _listTitle(
-                    title: "Forget password",
-                    subtitle: "Khôi phục sản phẩm tại đây",
-                    icon: IconlyLight.unlock,
-                    onPressed: () {},
-                    color: color),
-                _listTitle(
-                    title: user == null ? "Login" : "Logout",
-                    subtitle: user == null
-                        ? "Đăng nhập để sử dụng dịch vụ"
-                        : "Đăng xuất khỏi tài khoản hiện tại",
-                    icon: user == null ? IconlyLight.login : IconlyLight.logout,
-                    onPressed: () async {
-                      user == null
-                          ? Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                  builder: (context) => const LoginScreen()))
-                          : GlobalMethods.warningDialog(
-                              title: "Sign out",
-                              subtitle: "Do you wanna sign out?",
-                              fct: () {
-                                authInstance.signOut();
-                              },
-                              context: context);
-                    },
-                    color: color),
-                SwitchListTile(
-                  title: Text(
-                    "Theme",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: themeState.getDarkTheme
-                            ? Colors.white
-                            : Colors.black),
+                          children: <TextSpan>[
+                            TextSpan(
+                                text: _name == null ? "user" : _name!,
+                                style: TextStyle(
+                                  color: color,
+                                  fontSize: 25,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () {}),
+                          ])),
+                  const SizedBox(
+                    height: 5,
                   ),
-                  secondary: Icon(
-                    themeState.getDarkTheme
-                        ? Icons.dark_mode
-                        : Icons.light_mode_outlined,
-                    color:
-                        themeState.getDarkTheme ? Colors.white70 : Colors.black,
-                    size: 33,
+                  TextWidget(
+                    text: _email == null ? "Email@gmail.com" : _email!,
+                    color: color,
+                    textSize: 16,
                   ),
-                  value: themeState.getDarkTheme,
-                  onChanged: (bool value) {
-                    setState(() {
-                      themeState.setDarkTheme = value;
-                    });
-                  },
-                ),
-              ],
+                  const Divider(
+                    thickness: 2,
+                  ),
+                  const SizedBox(
+                    height: 20,
+                  ),
+                  _listTitle(
+                      title: "Address",
+                      subtitle: _addressController.text.toString(),
+                      icon: IconlyLight.location,
+                      onPressed: () async {
+                        await _showAddressDialog();
+                      },
+                      color: color),
+                  _listTitle(
+                      title: "Orders",
+                      subtitle: "Sản phẩm đã chọn",
+                      icon: IconlyLight.bag,
+                      onPressed: () {
+                        GlobalMethods.navigateTo(
+                            context, OrderScreen.routeName);
+                      },
+                      color: color),
+                  _listTitle(
+                      title: "Wishlist",
+                      subtitle: "Sản phẩm yêu thích",
+                      icon: IconlyLight.heart,
+                      onPressed: () {
+                        GlobalMethods.navigateTo(
+                            context, WishlistScreen.routeName);
+                      },
+                      color: color),
+                  _listTitle(
+                      title: "Viewed",
+                      subtitle: "Sản phẩm bạn đã xem",
+                      icon: IconlyLight.show,
+                      onPressed: () {
+                        GlobalMethods.navigateTo(
+                            context, ViewedRecentlyScreen.routeName);
+                      },
+                      color: color),
+                  _listTitle(
+                      title: "Forget password",
+                      subtitle: "Khôi phục sản phẩm tại đây",
+                      icon: IconlyLight.unlock,
+                      onPressed: () {
+                        /*Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => const ForgetPasswordScreen()));*/
+                        GlobalMethods.navigateTo(
+                            context, ForgetPasswordScreen.routeName);
+                      },
+                      color: color),
+                  _listTitle(
+                      title: user == null ? "Login" : "Logout",
+                      subtitle: user == null
+                          ? "Đăng nhập để sử dụng dịch vụ"
+                          : "Đăng xuất khỏi tài khoản hiện tại",
+                      icon:
+                      user == null ? IconlyLight.login : IconlyLight.logout,
+                      onPressed: () async {
+                        user == null
+                            ? /*Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                    builder: (context) => const LoginScreen()))*/
+                        GlobalMethods.navigateTo(
+                            context, LoginScreen.routeName)
+                            : (GlobalMethods.warningDialog(
+                            title: "Sign out",
+                            subtitle: "Do you wanna sign out?",
+                            fct: () {
+                              authInstance.signOut();
+                              Fluttertoast.showToast(
+                                  msg: "Log-out successfully");
+                            },
+                            context: context),
+                            Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(builder: (
+                                context) => const LoginScreen())));
+                      },
+                      color: color),
+                  SwitchListTile(
+                    title: Text(
+                      "Theme",
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: themeState.getDarkTheme
+                              ? Colors.white
+                              : Colors.black),
+                    ),
+                    secondary: Icon(
+                      themeState.getDarkTheme
+                          ? Icons.dark_mode
+                          : Icons.light_mode_outlined,
+                      color: themeState.getDarkTheme
+                          ? Colors.white70
+                          : Colors.black,
+                      size: 33,
+                    ),
+                    value: themeState.getDarkTheme,
+                    onChanged: (bool value) {
+                      setState(() {
+                        themeState.setDarkTheme = value;
+                      });
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -190,15 +254,33 @@ class _UserScreenState extends State<UserScreen> {
             ),
             actions: [
               TextButton(
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
+
+                  });
+                  String uid = user!.uid;
+                  try {
                     if (_addressController.text.isEmpty) {
                       Fluttertoast.showToast(msg: "Address can not Empty");
-                    } else {
-                      Navigator.of(context).pop();
+                    }
+                    else {
+                      await FirebaseFirestore.instance
+                          .collection("users")
+                          .doc(uid)
+                          .update({
+                        "shipping-address": _addressController.text,
+                      });
+                      if (context.mounted) {
+                        Navigator.of(context).pop();
+                      }
                       Fluttertoast.showToast(msg: "Update address Successful");
                     }
-                  });
+                  } catch (error) {
+                    if (context.mounted) {
+                      GlobalMethods.errorDialog(
+                          subtitle: "$error", context: context);
+                    }
+                  }
                 },
                 child: const Text('Update'),
               ),
