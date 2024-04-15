@@ -1,4 +1,5 @@
 import 'package:card_swiper/card_swiper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
 import 'package:provider/provider.dart';
@@ -15,6 +16,7 @@ import '../widgets/on_sales_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   static const routeName = "/HomeScreen";
 
   @override
@@ -28,6 +30,7 @@ class _HomeScreenState extends State<HomeScreen> {
     "images/offers/Offer3.jpg",
     "images/offers/Offer4.jpg"
   ];
+
   @override
   Widget build(BuildContext context) {
     final Utils utils = Utils(context);
@@ -36,6 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final productProviders = Provider.of<ProductsProvider>(context);
     List<ProductModel> allProducts = productProviders.getProducts;
     List<ProductModel> productsOnSale = productProviders.getOnSaleProducts;
+
+    // Samsung Galaxy A10: 820.
+    if (kDebugMode) {
+      print("Width: ${size.width}, Height: ${size.height}");
+    }
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -79,16 +87,24 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 RotatedBox(
                   quarterTurns: -1,
-                  child: Row(
+                  child: Column(
                     children: [
-                      TextWidget(
-                          text: "ON SALE",
-                          color: Colors.red,
-                          textSize: 20,
-                          isTitle: true),
-                      const Icon(
-                        IconlyLight.discount,
-                        color: Colors.red,
+                      Row(
+                        children: [
+                          TextWidget(
+                              text: "ON SALE",
+                              color: Colors.red,
+                              textSize: 20,
+                              isTitle: true),
+                          const Icon(
+                            IconlyLight.discount,
+                            color: Colors.red,
+                            size: 20,
+                          ),
+                          const SizedBox(
+                            width: 20,
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -141,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             GridView.count(
               shrinkWrap: true,
-              physics:const NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               crossAxisCount: 2,
               padding: EdgeInsets.zero,
               crossAxisSpacing: 8,
@@ -150,8 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 allProducts.length < 4 ? allProducts.length : 5,
                 (index) {
                   return ChangeNotifierProvider.value(
-                      value: allProducts[index],
-                      child:const FeedsWidget());
+                      value: allProducts[index], child: const FeedsWidget());
                 },
               ),
             ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
+import 'package:shopping_app_flutter/providers_impl/products_provider.dart';
+import 'package:shopping_app_flutter/screens/bottom_bar_screen.dart';
 import 'package:shopping_app_flutter/screens/cart_screens/cart_widget.dart';
 import 'package:shopping_app_flutter/widgets/empty_screen.dart';
 import 'package:shopping_app_flutter/services/global_method.dart';
@@ -8,6 +11,7 @@ import 'package:shopping_app_flutter/widgets/text_widget.dart';
 import '../../provider/dark_theme_provider.dart';
 import '../../providers_impl/cart_provider.dart';
 import '../../services/utils.dart';
+
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
@@ -18,7 +22,6 @@ class CartScreen extends StatelessWidget {
     final cartProvider = Provider.of<CartProvider>(context);
     final cartItemList =
         cartProvider.getCartItems.values.toList().reversed.toList();
-
     return cartItemList.isEmpty
         ? const EmptyScreen(
             imagePath: "images/cart.png",
@@ -32,11 +35,6 @@ class CartScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(12),
                 onTap: () =>
                     Navigator.canPop(context) ? Navigator.pop(context) : null,
-                child: Icon(
-                  IconlyLight.arrowLeft2,
-                  size: 30,
-                  color: color,
-                ),
               ),
               backgroundColor:
                   themeState.getDarkTheme ? Colors.white12 : Colors.blueGrey,
@@ -55,7 +53,11 @@ class CartScreen extends StatelessWidget {
                         subtitle: "Are you sure?",
                         fct: () {
                           cartProvider.clearCart();
-                          Navigator.pop(context);
+                          Fluttertoast.showToast(msg: "Delete Successfully");
+                          Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const BottomBarScreen()));
                         },
                         context: context);
                   },
@@ -93,6 +95,16 @@ class CartScreen extends StatelessWidget {
     final themeState = Provider.of<DarkThemeProvider>(context);
     Size size = Utils(context).getScreenSize;
     final Color color = Utils(context).getColor;
+    final cartProvider = Provider.of<CartProvider>(context);
+    final productProvider = Provider.of<ProductsProvider>(context);
+    var total = 0.0;
+    cartProvider.getCartItems.forEach((key, value) {
+      final getCurrentProduct = productProvider.findProdById(value.productId);
+      total += (getCurrentProduct.isOnSale
+              ? getCurrentProduct.salePrice
+              : getCurrentProduct.price) *
+          value.quantity;
+    });
     return Column(
       children: [
         Divider(
@@ -127,7 +139,7 @@ class CartScreen extends StatelessWidget {
                 ),
                 FittedBox(
                   child: TextWidget(
-                    text: "Total: \$239",
+                    text: "Total: \$${total.toStringAsFixed(2)}",
                     color: color,
                     textSize: 22,
                     isTitle: true,

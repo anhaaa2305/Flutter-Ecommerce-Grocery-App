@@ -2,6 +2,7 @@ import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app_flutter/inner_screens/product_details.dart';
 import 'package:shopping_app_flutter/models/cart_model.dart';
@@ -38,7 +39,6 @@ class _CartWidgetState extends State<CartWidget> {
     super.dispose();
     _quantityTextController.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final themeState = Provider.of<DarkThemeProvider>(context);
@@ -174,8 +174,10 @@ class _CartWidgetState extends State<CartWidget> {
                       child: Column(
                         children: [
                           InkWell(
-                            onTap: () {
-                              cartProvider.removeOneItem(cartModel.productId);
+                            onTap: () async {
+                             /* await cartProvider.removeOneItem(cartModel.productId);*/
+                              await cartProvider.removeOneItem(productId: cartModel.productId, cartId: cartModel.id, quantity: cartModel.quantity);
+                              Fluttertoast.showToast(msg: "Remove ${getCurrentProduct.title} successfully", toastLength: Toast.LENGTH_SHORT, gravity: ToastGravity.CENTER);
                             },
                             child: const Icon(
                               CupertinoIcons.cart_badge_minus,

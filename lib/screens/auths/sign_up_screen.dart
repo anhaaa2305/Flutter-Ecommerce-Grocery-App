@@ -43,6 +43,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _addressFocusNode.dispose();
     super.dispose();
   }
+
   bool _isLoading = false;
   bool _validateForm() {
     if (_emailTextController.text.isEmpty ||

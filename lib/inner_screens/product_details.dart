@@ -4,7 +4,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app_flutter/providers_impl/cart_provider.dart';
 import 'package:shopping_app_flutter/providers_impl/viewed_prod_provider.dart';
@@ -30,6 +29,7 @@ class ProductDetailsScreen extends StatefulWidget {
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   final _quantityTextController = TextEditingController(text: "1");
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -43,31 +43,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     Size size = Utils(context).getScreenSize;
     final Color color = Utils(context).getColor;
     final productProviders = Provider.of<ProductsProvider>(context);
-    final productId = ModalRoute
-        .of(context)!
-        .settings
-        .arguments as String;
+    final productId = ModalRoute.of(context)!.settings.arguments as String;
     final getCurrentProduct = productProviders.findProdById(productId);
     double usedPrice = getCurrentProduct.isOnSale
         ? getCurrentProduct.salePrice
         : getCurrentProduct.price;
     final cartProvider = Provider.of<CartProvider>(context);
     bool? isInCart =
-    cartProvider.getCartItems.containsKey(getCurrentProduct.id);
+        cartProvider.getCartItems.containsKey(getCurrentProduct.id);
     final cartItemList =
-    cartProvider.getCartItems.values
-        .toList()
-        .reversed
-        .toList();
+        cartProvider.getCartItems.values.toList().reversed.toList();
     final wishListProvider = Provider.of<WishListProvider>(context);
-    bool? isInWishList = wishListProvider.getWishListItem.containsKey(productId);
+    bool? isInWishList =
+        wishListProvider.getWishListItem.containsKey(productId);
     final viewedProdProvider = Provider.of<ViewedProdProvider>(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
         leading: InkWell(
           borderRadius: BorderRadius.circular(12),
-          onTap: (){
+          onTap: () {
             viewedProdProvider.addProductToHistory(productId: productId);
             Navigator.canPop(context) ? Navigator.pop(context) : null;
           },
@@ -82,8 +77,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             padding: const EdgeInsets.only(right: 17.0),
             child: InkWell(
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(
-                    builder: (context) => const CartScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const CartScreen()));
               },
               borderRadius: BorderRadius.circular(12),
               child: badges.Badge(
@@ -97,21 +94,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ),
                 badgeContent: Text(
                   cartItemList.length.toString(),
-                  style: const TextStyle(color: Colors.white,
+                  style: const TextStyle(
+                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                       fontSize: 15),
                 ),
                 child: Icon(
                   themeState.getDarkTheme ? IconlyBold.buy : IconlyLight.buy,
                   color: color,
-                  size: 30,),
+                  size: 30,
+                ),
               ),
             ),
           ),
         ],
         elevation: 2,
         backgroundColor:
-        themeState.getDarkTheme ? Colors.white12 : Colors.blueGrey,
+            themeState.getDarkTheme ? Colors.white12 : Colors.blueGrey,
       ),
       body: Column(
         children: [
@@ -139,7 +138,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 children: [
                   Padding(
                     padding:
-                    const EdgeInsets.only(top: 20, left: 30, right: 30),
+                        const EdgeInsets.only(top: 20, left: 30, right: 30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -160,59 +159,59 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                   Padding(
                     padding:
-                    const EdgeInsets.only(top: 20, left: 20, right: 30),
+                        const EdgeInsets.only(top: 20, left: 20, right: 30),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         getCurrentProduct.isOnSale
                             ? Row(
-                          children: [
-                            TextWidget(
-                              text:
-                              getCurrentProduct.salePrice.toString(),
-                              color: Colors.green,
-                              textSize: 22,
-                              isTitle: true,
-                            ),
-                            TextWidget(
-                              text: " /Kg",
-                              color: color,
-                              textSize: 18,
-                              isTitle: false,
-                            ),
-                            const SizedBox(
-                              width: 10,
-                            ),
-                            Visibility(
-                              visible: true,
-                              child: Text(
-                                "\$ ${getCurrentProduct.price.toString()}",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: color,
-                                  decoration: TextDecoration.lineThrough,
-                                ),
-                              ),
-                            ),
-                          ],
-                        )
+                                children: [
+                                  TextWidget(
+                                    text: getCurrentProduct.salePrice
+                                        .toStringAsFixed(2),
+                                    color: Colors.green,
+                                    textSize: 22,
+                                    isTitle: true,
+                                  ),
+                                  TextWidget(
+                                    text: " /Kg",
+                                    color: color,
+                                    textSize: 18,
+                                    isTitle: false,
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Visibility(
+                                    visible: true,
+                                    child: Text(
+                                      "\$ ${getCurrentProduct.price.toString()}",
+                                      style: TextStyle(
+                                        fontSize: 20,
+                                        color: color,
+                                        decoration: TextDecoration.lineThrough,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
                             : Row(
-                          children: [
-                            TextWidget(
-                              text: getCurrentProduct.price.toString(),
-                              color: Colors.green,
-                              textSize: 22,
-                              isTitle: true,
-                            ),
-                            TextWidget(
-                              text: " /Kg",
-                              color: color,
-                              textSize: 18,
-                              isTitle: false,
-                            ),
-                          ],
-                        ),
+                                children: [
+                                  TextWidget(
+                                    text: getCurrentProduct.price.toString(),
+                                    color: Colors.green,
+                                    textSize: 22,
+                                    isTitle: true,
+                                  ),
+                                  TextWidget(
+                                    text: " /Kg",
+                                    color: color,
+                                    textSize: 18,
+                                    isTitle: false,
+                                  ),
+                                ],
+                              ),
                         const Spacer(),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -247,8 +246,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 } else {
                                   setState(() {
                                     _quantityTextController.text = (int.parse(
-                                        _quantityTextController.text) -
-                                        1)
+                                                _quantityTextController.text) -
+                                            1)
                                         .toString();
                                   });
                                 }
@@ -288,7 +287,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                 setState(() {
                                   _quantityTextController.text =
                                       (int.parse(_quantityTextController.text) +
-                                          1)
+                                              1)
                                           .toString();
                                 });
                               },
@@ -333,9 +332,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                   children: [
                                     TextWidget(
                                       text:
-                                      "\$ ${(usedPrice * int.parse(
-                                          _quantityTextController.text))
-                                          .toStringAsFixed(2)}",
+                                          "\$ ${(usedPrice * int.parse(_quantityTextController.text)).toStringAsFixed(2)}",
                                       color: color,
                                       textSize: 20,
                                       isTitle: true,
@@ -363,21 +360,30 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             child: InkWell(
                               onTap: isInCart
                                   ? null
-                                  : () {
-
-                                final User? user = authInstance.currentUser;
-                                if (user == null) {
-                                  GlobalMethods.errorDialog(subtitle: "Please log in to continue using the service. Thank you!", context: context);
-                                  return;
-                                }
-                                Fluttertoast.showToast(
-                                    msg: "Add to Cart Successful");
-                                cartProvider.addProductsToCart(
+                                  : () async {
+                                      final User? user =
+                                          authInstance.currentUser;
+                                      if (user == null) {
+                                        GlobalMethods.errorDialog(
+                                            subtitle:
+                                                "Please log in to continue using the service. Thank you!",
+                                            context: context);
+                                        return;
+                                      }
+                                     /* Fluttertoast.showToast(
+                                          msg: "Add to Cart Successful");*/
+                                      /*  cartProvider.addProductsToCart(
                                   productId: getCurrentProduct.id,
                                   quantity: int.parse(
                                       _quantityTextController.text),
-                                );
-                              },
+                                );*/
+                                      await GlobalMethods.addToCart(
+                                          productId: getCurrentProduct.id,
+                                          quantity: int.parse(
+                                              _quantityTextController.text),
+                                          context: context);
+                                      await cartProvider.fetchCart();
+                                    },
                               borderRadius: BorderRadius.circular(10),
                               child: Padding(
                                 padding: const EdgeInsets.all(10.0),

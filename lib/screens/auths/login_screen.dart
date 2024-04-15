@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shopping_app_flutter/consts/contss.dart';
 import 'package:shopping_app_flutter/consts/firebase_constss.dart';
+import 'package:shopping_app_flutter/fetch_product/fetch_screen.dart';
 import 'package:shopping_app_flutter/screens/auths/forget_pass.dart';
 import 'package:shopping_app_flutter/screens/auths/sign_up_screen.dart';
 import 'package:shopping_app_flutter/screens/bottom_bar_screen.dart';
@@ -64,7 +65,7 @@ class _LoginScreenState extends State<LoginScreen> {
             password: _passTextController.text.trim());
         if (context.mounted) {
           Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const BottomBarScreen()));
+              MaterialPageRoute(builder: (context) => const FetchScreen()));
         }
         Fluttertoast.showToast(msg: "Login successfully");
       } on FirebaseException catch (error) {
@@ -303,7 +304,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   AuthButton(
                       fct: () {
                         Navigator.of(context).pushReplacement(MaterialPageRoute(
-                            builder: (context) => const BottomBarScreen()));
+                            builder: (context) => const FetchScreen()));
                       },
                       buttonText: "Continue as a guest",
                       primary: Colors.black),

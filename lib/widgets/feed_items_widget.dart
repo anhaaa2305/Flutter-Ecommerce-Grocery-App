@@ -2,7 +2,6 @@ import 'package:fancy_shimmer_image/fancy_shimmer_image.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:provider/provider.dart';
 import 'package:shopping_app_flutter/inner_screens/product_details.dart';
 import 'package:shopping_app_flutter/models/products_model.dart';
@@ -18,23 +17,28 @@ import '../services/utils.dart';
 
 class FeedsWidget extends StatefulWidget {
   const FeedsWidget({super.key});
+
   @override
   State<FeedsWidget> createState() => _FeedsWidgetState();
 }
+
 class _FeedsWidgetState extends State<FeedsWidget> {
   final _quantityTextController = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _quantityTextController.text = "1";
   }
+
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
     _quantityTextController.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final themeState = Provider.of<DarkThemeProvider>(context);
@@ -44,7 +48,8 @@ class _FeedsWidgetState extends State<FeedsWidget> {
     final cartProvider = Provider.of<CartProvider>(context);
     bool? isInCart = cartProvider.getCartItems.containsKey(productsModel.id);
     final wishListProvider = Provider.of<WishListProvider>(context);
-    bool? isInWishList = wishListProvider.getWishListItem.containsKey(productsModel.id);
+    bool? isInWishList =
+        wishListProvider.getWishListItem.containsKey(productsModel.id);
     return Padding(
       padding: const EdgeInsets.all(5.0),
       child: Material(
@@ -60,7 +65,8 @@ class _FeedsWidgetState extends State<FeedsWidget> {
             children: [
               FancyShimmerImage(
                 imageUrl: productsModel.imageUrl,
-                height: size.width * 0.18,
+                height:
+                    size.height < 850 ? size.width * 0.15 : size.width * 0.18,
                 width: size.width * 0.22,
                 boxFit: BoxFit.fill,
               ),
@@ -79,12 +85,11 @@ class _FeedsWidgetState extends State<FeedsWidget> {
                         maxLines: 1,
                       ),
                     ),
-                     Flexible(
+                    Flexible(
                       flex: 1,
                       child: HeartButton(
                         productId: productsModel.id,
                         isInWishList: isInWishList,
-
                       ),
                     ),
                   ],
@@ -132,6 +137,7 @@ class _FeedsWidgetState extends State<FeedsWidget> {
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                 ),
+                                textInputAction: TextInputAction.done,
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.center,
                                 textAlignVertical: TextAlignVertical.center,
@@ -162,19 +168,23 @@ class _FeedsWidgetState extends State<FeedsWidget> {
               SizedBox(
                 width: double.infinity,
                 child: TextButton(
-                  onPressed: isInCart ? null : () {
-                    final User? user = authInstance.currentUser;
-                    if (user == null) {
-                      GlobalMethods.errorDialog(subtitle: "Please log in to continue using the service. Thank you!", context: context);
-                      return;
-                    }
-
-                    Fluttertoast.showToast(msg: "Add to Cart Successful");
-                    cartProvider.addProductsToCart(
-                      productId: productsModel.id,
-                      quantity: int.parse(_quantityTextController.text),
-                    );
-                  },
+                  onPressed: isInCart
+                      ? null
+                      : () async {
+                          final User? user = authInstance.currentUser;
+                          if (user == null) {
+                            GlobalMethods.errorDialog(
+                                subtitle:
+                                    "Please log in to continue using the service. Thank you!",
+                                context: context);
+                            return;
+                          }
+                         await GlobalMethods.addToCart(
+                              productId: productsModel.id,
+                              quantity: int.parse(_quantityTextController.text),
+                              context: context);
+                          await cartProvider.fetchCart();
+                        },
                   style: ButtonStyle(
                     backgroundColor: MaterialStateProperty.all(
                         themeState.getDarkTheme

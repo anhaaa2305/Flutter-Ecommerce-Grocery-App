@@ -1,21 +1,22 @@
-import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_iconly/flutter_iconly.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:provider/provider.dart';
-import 'package:shopping_app_flutter/consts/firebase_constss.dart';
-import 'package:shopping_app_flutter/screens/auths/forget_pass.dart';
-import 'package:shopping_app_flutter/screens/auths/login_screen.dart';
-import 'package:shopping_app_flutter/screens/loading_manager.dart';
-import 'package:shopping_app_flutter/screens/order_screens/orders_screen.dart';
-import 'package:shopping_app_flutter/screens/viewed_recently/viewed_recently_screen.dart';
-import 'package:shopping_app_flutter/screens/wishlist_screens/wishlist_screen.dart';
-import 'package:shopping_app_flutter/services/global_method.dart';
-import 'package:shopping_app_flutter/widgets/text_widget.dart';
-import '../provider/dark_theme_provider.dart';
+import "dart:async";
+import "package:cloud_firestore/cloud_firestore.dart";
+import "package:firebase_auth/firebase_auth.dart";
+import "package:flutter/gestures.dart";
+import "package:flutter/material.dart";
+import "package:flutter_iconly/flutter_iconly.dart";
+import "package:fluttertoast/fluttertoast.dart";
+import "package:provider/provider.dart";
+import "package:shopping_app_flutter/consts/firebase_constss.dart";
+import "package:shopping_app_flutter/screens/auths/forget_pass.dart";
+import "package:shopping_app_flutter/screens/auths/login_screen.dart";
+import "package:shopping_app_flutter/screens/loading_manager.dart";
+import "package:shopping_app_flutter/screens/order_screens/orders_screen.dart";
+import "package:shopping_app_flutter/screens/viewed_recently/viewed_recently_screen.dart";
+import "package:shopping_app_flutter/screens/wishlist_screens/wishlist_screen.dart";
+import "package:shopping_app_flutter/services/global_method.dart";
+import "package:shopping_app_flutter/widgets/text_widget.dart";
+import "../provider/dark_theme_provider.dart";
+import "../providers_impl/cart_provider.dart";
 
 class UserScreen extends StatefulWidget {
   const UserScreen({super.key});
@@ -26,7 +27,7 @@ class UserScreen extends StatefulWidget {
 
 class _UserScreenState extends State<UserScreen> {
   final TextEditingController _addressController =
-  TextEditingController(text: "");
+      TextEditingController(text: "");
   bool _isLoading = false;
   final User? user = authInstance.currentUser;
   String? _email;
@@ -61,10 +62,10 @@ class _UserScreenState extends State<UserScreen> {
     try {
       String uid = user!.uid;
       final DocumentSnapshot userDoc =
-      await FirebaseFirestore.instance.collection("users").doc(uid).get();
+          await FirebaseFirestore.instance.collection("users").doc(uid).get();
       _email = userDoc.get("email");
       _name = userDoc.get("name");
-      _address = userDoc.get("shipping-address");
+       _address = userDoc.get("shipping-address");
       _addressController.text = userDoc.get("shipping-address");
     } catch (error) {
       setState(() {
@@ -84,7 +85,8 @@ class _UserScreenState extends State<UserScreen> {
   Widget build(BuildContext context) {
     final themeState = Provider.of<DarkThemeProvider>(context);
     final Color color =
-    themeState.getDarkTheme ? Colors.white.withOpacity(0.9) : Colors.black;
+        themeState.getDarkTheme ? Colors.white.withOpacity(0.9) : Colors.black;
+    final cartProvider = Provider.of<CartProvider>(context);
     return Scaffold(
       body: LoadingManager(
         isLoading: _isLoading,
@@ -105,16 +107,15 @@ class _UserScreenState extends State<UserScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                           children: <TextSpan>[
-                            TextSpan(
-                                text: _name == null ? "user" : _name!,
-                                style: TextStyle(
-                                  color: color,
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {}),
-                          ])),
+                        TextSpan(
+                            text: _name == null ? "user" : _name!,
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 25,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            recognizer: TapGestureRecognizer()..onTap = () {}),
+                      ])),
                   const SizedBox(
                     height: 5,
                   ),
@@ -180,26 +181,21 @@ class _UserScreenState extends State<UserScreen> {
                           ? "Đăng nhập để sử dụng dịch vụ"
                           : "Đăng xuất khỏi tài khoản hiện tại",
                       icon:
-                      user == null ? IconlyLight.login : IconlyLight.logout,
+                          user == null ? IconlyLight.login : IconlyLight.logout,
                       onPressed: () async {
                         user == null
-                            ? /*Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(
-                                    builder: (context) => const LoginScreen()))*/
-                        GlobalMethods.navigateTo(
-                            context, LoginScreen.routeName)
-                            : (GlobalMethods.warningDialog(
-                            title: "Sign out",
-                            subtitle: "Do you wanna sign out?",
-                            fct: () {
-                              authInstance.signOut();
-                              Fluttertoast.showToast(
-                                  msg: "Log-out successfully");
-                            },
-                            context: context),
-                            Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (
-                                context) => const LoginScreen())));
+                            ? GlobalMethods.navigateTo(
+                                context, LoginScreen.routeName)
+                            : GlobalMethods.warningDialog(
+                                title: "Sign out",
+                                subtitle: "Do you wanna sign out?",
+                                fct: () {
+                                  authInstance.signOut();
+                                  cartProvider.clearCart();
+                                  Fluttertoast.showToast(
+                                      msg: "Logout successfully");
+                                },
+                                context: context);
                       },
                       color: color),
                   SwitchListTile(
@@ -241,7 +237,7 @@ class _UserScreenState extends State<UserScreen> {
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: const Text('Update'),
+            title: const Text("Update"),
             content: TextField(
               onChanged: (value) {},
               controller: _addressController,
@@ -255,15 +251,12 @@ class _UserScreenState extends State<UserScreen> {
             actions: [
               TextButton(
                 onPressed: () async {
-                  setState(() {
-
-                  });
+                  setState(() {});
                   String uid = user!.uid;
                   try {
                     if (_addressController.text.isEmpty) {
                       Fluttertoast.showToast(msg: "Address can not Empty");
-                    }
-                    else {
+                    } else {
                       await FirebaseFirestore.instance
                           .collection("users")
                           .doc(uid)
@@ -282,13 +275,12 @@ class _UserScreenState extends State<UserScreen> {
                     }
                   }
                 },
-                child: const Text('Update'),
+                child: const Text("Update"),
               ),
             ],
           );
         });
   }
-
   Widget _listTitle({
     required String title,
     required String subtitle,
